@@ -32,7 +32,7 @@ def update_user_progress(username, wpm, accuracy):
         user_progress = json.load(f)
 
     user_record = user_progress.get(username, [])
-    user_record.append({'date': datetime.now().isoformat(), 'wpm': wpm, 'accuracy': accuracy})
+    user_record.append({'name': username, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat()})
     user_progress[username] = user_record
 
     with open('UserData/userprogress.json', 'w') as f:
