@@ -1,0 +1,8 @@
+app: python
+version: 3.12.3
+
+hooks:
+  deploy: 
+    - pip install -r requirements.txt
+  start: 
+    - py main.py
