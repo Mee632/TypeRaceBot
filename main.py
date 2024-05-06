@@ -48,7 +48,7 @@ async def multiplayer(ctx, num_players: int):
     await message.edit(content="Go!")
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
-    words = random.sample(open("NeededFiles/randomquotes.csv").readlines(), 15)
+    words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), 15)
     sentence = ' '.join(word.strip() for word in words)
     sentence_message = await ctx.followup.send(sentence)
 
@@ -86,7 +86,7 @@ async def multiplayer(ctx, num_players: int):
 
 @bot.tree.command(name="userrecords")
 async def userrecords(ctx, username: str = None):
-    with open('userdata/userrecords.json', 'r') as f:
+    with open('UserData/userrecords.json', 'r') as f:
         user_records = json.load(f)
 
     if username is None:
@@ -104,13 +104,11 @@ async def userrecords(ctx, username: str = None):
 
 @bot.tree.command(name="leaderboard")
 async def leaderboard(ctx):
-    with open('userdata/userrecords.json', 'r') as f:
+    with open('UserData/userrecords.json', 'r') as f:
         user_records = json.load(f)
 
-    # Sort the user records by 'record_wpm' in descending order
     sorted_records = sorted(user_records.items(), key=lambda x: x[1]['record_wpm'], reverse=True)
 
-    # Select the top 10 records
     top_10_records = sorted_records[:10]
 
     leaderboard_message = "Leaderboard:\n"
@@ -137,7 +135,7 @@ async def typerace_german(ctx, num_words: int = 15):
     await message.edit(content="Go!")
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
-    words = random.sample(open("NeededFiles/randomquotes.csv").readlines(), num_words)
+    words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), num_words)
     sentence = ' '.join(word.strip() for word in words)
     sentence_message = await ctx.followup.send(sentence)
 
@@ -165,7 +163,7 @@ async def typerace_german(ctx, num_words: int = 15):
                 f"Your words per minute: {wpm}. Correctness: {correctness}%\nYour sentence:\n{underlined_sentence}")
 
             if num_words == 15:
-                with open('userdata/userrecords.json', 'r') as f:
+                with open('UserData/userrecords.json', 'r') as f:
                     user_records = json.load(f)
 
                 username = ctx.user.name
@@ -176,7 +174,7 @@ async def typerace_german(ctx, num_words: int = 15):
                     user_record['accuracy'] = correctness
                     user_records[username] = user_record
 
-                    with open('userdata/userrecords.json', 'w') as f:
+                    with open('UserData/userrecords.json', 'w') as f:
                         json.dump(user_records, f)
 
 

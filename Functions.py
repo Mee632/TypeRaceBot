@@ -1,6 +1,3 @@
-import json
-
-
 def calculate_wpm(start_time, end_time, num_words):
     elapsed_time = end_time - start_time
     minutes = elapsed_time / 60
