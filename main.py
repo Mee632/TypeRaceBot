@@ -10,6 +10,7 @@ from typing import Final
 from Functions import calculate_wpm
 from Functions import calculate_correctness
 from Functions import underline_errors
+from Functions import update_user_progress
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
@@ -102,6 +103,25 @@ async def userrecords(ctx, username: str = None):
         await ctx.response.send_message(f"{username}'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
 
 
+@bot.tree.command(name="userprogress")
+async def userprogress(ctx, username: str = None):
+    with open('UserData/userprogress.json', 'r') as f:
+        user_progress = json.load(f)
+
+    if username is None:
+        username = ctx.user.name
+
+    user_records = user_progress.get(username)
+
+    if user_records is None:
+        await ctx.response.send_message(f"{username} hasn't raced yet.")
+    else:
+        progress_message = f"{username}'s progress:\n"
+        for record in user_records:
+            progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}%\n"
+        await ctx.response.send_message(progress_message)
+
+
 @bot.tree.command(name="leaderboard")
 async def leaderboard(ctx):
     with open('UserData/userrecords.json', 'r') as f:
@@ -168,6 +188,7 @@ async def typerace_german(ctx, num_words: int = 15):
 
                 username = ctx.user.name
                 user_record = user_records.get(username, {'record_wpm': 0, 'accuracy': 0})
+                update_user_progress(username, wpm, correctness)
 
                 if wpm > user_record['record_wpm']:
                     user_record['record_wpm'] = wpm

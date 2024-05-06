@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+
 def calculate_wpm(start_time, end_time, num_words):
     elapsed_time = end_time - start_time
     minutes = elapsed_time / 60
@@ -22,3 +25,15 @@ def underline_errors(user_input, correct_sentence):
         else:
             underlined_sentence.append(f"__{u}__")
     return ' '.join(underlined_sentence)
+
+
+def update_user_progress(username, wpm, accuracy):
+    with open('UserData/userprogress.json', 'r') as f:
+        user_progress = json.load(f)
+
+    user_record = user_progress.get(username, [])
+    user_record.append({'date': datetime.now().isoformat(), 'wpm': wpm, 'accuracy': accuracy})
+    user_progress[username] = user_record
+
+    with open('UserData/userprogress.json', 'w') as f:
+        json.dump(user_progress, f)
