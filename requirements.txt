@@ -1,0 +1,7 @@
+asyncio
+time
+json
+os
+discord
+random
+dotenv
