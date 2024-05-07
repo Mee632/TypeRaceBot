@@ -92,31 +92,31 @@ async def multiplayer(ctx, num_players: int):
 
 
 @bot.tree.command(name="userrecords")
-async def userrecords(ctx, username: str = None):
-    if username is None:
-        username = ctx.user.name
+async def userrecords(ctx, uuid: str = None):
+    if uuid is None:
+        uuid = ctx.user.id
 
-    user_record = userdata.find_one({"_id": username})
+    user_record = userdata.find_one({"_id": uuid})
 
     if user_record is None or 'record' not in user_record:
-        await ctx.response.send_message(f"{username} hasn't raced yet.")
+        await ctx.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
         record_wpm = user_record['record']['wpm']
         accuracy = user_record['record']['accuracy']
-        await ctx.response.send_message(f"{username}'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
+        await ctx.response.send_message(f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
 
 
 @bot.tree.command(name="userprogress")
-async def userprogress(ctx, username: str = None):
-    if username is None:
-        username = ctx.user.name
+async def userprogress(ctx, uuid: str = None):
+    if uuid is None:
+        uuid = ctx.user.id
 
-    user_record = userdata.find_one({"_id": username})
+    user_record = userdata.find_one({"_id": uuid})
 
     if user_record is None or 'progress' not in user_record:
-        await ctx.response.send_message(f"{username} hasn't raced yet.")
+        await ctx.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
-        progress_message = f"{username}'s progress:\n"
+        progress_message = f"<@{uuid}>'s progress:\n"
         for record in user_record['progress']:
             progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}%\n"
         await ctx.response.send_message(progress_message)
