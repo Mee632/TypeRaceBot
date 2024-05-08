@@ -27,11 +27,11 @@ def underline_errors(user_input, correct_sentence):
     return ' '.join(underlined_sentence)
 
 
-def update_user_progress(userdata, uid, wpm, accuracy):
+def update_user_progress(userdata, uid, wpm, accuracy, language):
     user_record = userdata.find_one({"_id": uid})
     if user_record is None:
-        userdata.insert_one({"_id": uid, "progress": [], "record": {"wpm": 0, "accuracy": 0}})
+        userdata.insert_one({"_id": uid, "progress": [], "record": {"wpm": 0, "accuracy": 0, "language": ""}})
 
     user_record = userdata.find_one({"_id": uid})
-    user_record["progress"].append({'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat()})
+    user_record["progress"].append({'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
     userdata.update_one({"_id": uid}, {"$set": {"progress": user_record["progress"]}})

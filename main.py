@@ -55,7 +55,7 @@ async def multiplayer(interaction, num_players: int):
     await message.edit(content="Go!")
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
-    words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), 15)
+    words = random.sample(open("FilesNeeded/randomquotes_de.csv").readlines(), 15)
     sentence = ' '.join(word.strip() for word in words)
     sentence_message = await interaction.followup.send(sentence)
 
@@ -146,11 +146,16 @@ async def leaderboard(interaction):
     await interaction.response.send_message(leaderboard_message)
 
 
-@bot.tree.command(name="typerace_german")
-async def typerace_german(interaction, num_words: int = 15):
+@bot.tree.command(name="typerace")
+async def typerace(interaction, language: str = None, num_words: int = 15):
+    if language is None:
+        language = "en"
+
     if num_words < 1:
         await interaction.response.send_message("You must type at least 1 word.")
         return
+
+    words = random.sample(open(f"FilesNeeded/randomquotes_{language}.csv").readlines(), num_words)
 
     await interaction.response.send_message("TypeRace is starting in 3 seconds!")
     await asyncio.sleep(1)
@@ -162,7 +167,6 @@ async def typerace_german(interaction, num_words: int = 15):
     await message.edit(content="Go!")
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
-    words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), num_words)
     sentence = ' '.join(word.strip() for word in words)
     sentence_message = await interaction.followup.send(sentence)
 
@@ -192,10 +196,10 @@ async def typerace_german(interaction, num_words: int = 15):
             if num_words == 15:
                 uid = interaction.user.id
                 user_record = userdata.find_one({"_id": uid})
-                update_user_progress(userdata, uid, wpm, correctness)
+                update_user_progress(userdata, uid, wpm, correctness, language)
 
                 if user_record is None or wpm > user_record['record']['wpm']:
-                    userdata.update_one({"_id": uid}, {"$set": {"record": {"wpm": wpm, "accuracy": correctness}}})
+                    userdata.update_one({"_id": uid}, {"$set": {"record": {"wpm": wpm, "accuracy": correctness, "language": language}}})
 
 
 bot.run(TOKEN)
