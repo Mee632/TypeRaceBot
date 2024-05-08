@@ -107,8 +107,9 @@ async def userrecords(interaction, member: discord.Member = None):
         # Fetch and format the user's data
         record_wpm = user_record['record']['wpm']
         accuracy = user_record['record']['accuracy']
+        language_used = user_record['record']['language']
         await interaction.response.send_message(
-            f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
+            f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%\nLanguage: {language_used}")
 
 
 @bot.tree.command(name="userprogress")
@@ -125,7 +126,7 @@ async def userrecords(interaction, member: discord.Member = None):
     else:
         progress_message = f"<@{uuid}>'s progress:\n"
         for record in user_record['progress']:
-            progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}%\n"
+            progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}% in {record['language']}\n"
         await interaction.response.send_message(progress_message)
 
 
@@ -141,7 +142,7 @@ async def leaderboard(interaction):
     for i, record in enumerate(top_10_records, start=1):
         uuid = record['_id']
         stats = record['record']
-        leaderboard_message += f"{i}. <@{uuid}> - WPM: {stats['wpm']}, Accuracy: {stats['accuracy']}%\n"
+        leaderboard_message += f"{i}. <@{uuid}> - WPM: {stats['wpm']}, Accuracy: {stats['accuracy']}% in {stats['language']}\n"
 
     await interaction.response.send_message(leaderboard_message)
 
