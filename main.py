@@ -1,6 +1,5 @@
 import asyncio
 import time
-import json
 import os
 import discord
 import random
@@ -14,7 +13,8 @@ from Functions import underline_errors
 from Functions import update_user_progress
 
 #MongoDb
-myclient = pymongo.MongoClient("mongodb+srv://wimmerjakob9:zjt6LQCz7b9qyVEl@typeracebot.nauuy66.mongodb.net/?retryWrites=true&w=majority&appName=TypeRaceBot")
+myclient = pymongo.MongoClient(
+    "mongodb+srv://wimmerjakob9:zjt6LQCz7b9qyVEl@typeracebot.nauuy66.mongodb.net/?retryWrites=true&w=majority&appName=TypeRaceBot")
 mydb = myclient["TypeRaceBot"]
 userdata = mydb["User"]
 
@@ -35,19 +35,19 @@ async def on_ready():
 
 
 @bot.tree.command(name="help")
-async def help(ctx):
-    await ctx.response.send_message("Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:\n")
+async def help(interaction):
+    await interaction.response.send_message("Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:\n")
 
 
 @bot.tree.command(name="multiplayer")
-async def multiplayer(ctx, num_players: int):
+async def multiplayer(interaction, num_players: int):
     if num_players < 2:
-        await ctx.response.send_message("You need at least 2 players for a multiplayer game.")
+        await interaction.response.send_message("You need at least 2 players for a multiplayer game.")
         return
 
-    await ctx.response.send_message(f"Multiplayer TypeRace is starting in 3 seconds for {num_players} players!")
+    await interaction.response.send_message(f"Multiplayer TypeRace is starting in 3 seconds for {num_players} players!")
     await asyncio.sleep(1)
-    message = await ctx.followup.send("Get ready!")
+    message = await interaction.followup.send("Get ready!")
     await asyncio.sleep(1)
     for i in range(3, 0, -1):
         await message.edit(content=str(i))
@@ -57,19 +57,19 @@ async def multiplayer(ctx, num_players: int):
     await message.edit(content="Type the following sentence as fast as you can!")
     words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), 15)
     sentence = ' '.join(word.strip() for word in words)
-    sentence_message = await ctx.followup.send(sentence)
+    sentence_message = await interaction.followup.send(sentence)
 
     start_time = time.time()
 
     def check(m):
-        return m.author != bot.user and m.channel == ctx.channel
+        return m.author != bot.user and m.channel == interaction.channel
 
     results = []
     for _ in range(num_players):
         try:
             msg = await bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
-            await ctx.followup.send("Time is up!")
+            await interaction.followup.send("Time is up!")
         else:
             end_time = time.time()
             wpm = calculate_wpm(start_time, end_time, len(words))
@@ -77,9 +77,9 @@ async def multiplayer(ctx, num_players: int):
             underlined_sentence = underline_errors(msg.content, sentence)
 
             if correctness < 30:
-                await ctx.followup.send(f"{msg.author.name}, your test is invalid due to low accuracy.")
+                await interaction.followup.send(f"{msg.author.name}, your test is invalid due to low accuracy.")
             else:
-                await ctx.followup.send(
+                await interaction.followup.send(
                     f"{msg.author.name}, your words per minute: {wpm}. Correctness: {correctness}%\nYour sentence:\n{underlined_sentence}")
                 results.append((msg.author.name, wpm, correctness))
 
@@ -88,42 +88,49 @@ async def multiplayer(ctx, num_players: int):
 
     # Send the winner
     winner = results[0]
-    await ctx.followup.send(f"The winner is {winner[0]} with {winner[1]} words per minute and {winner[2]}% correctness!")
+    await interaction.followup.send(
+        f"The winner is {winner[0]} with {winner[1]} words per minute and {winner[2]}% correctness!")
 
 
 @bot.tree.command(name="userrecords")
-async def userrecords(ctx, uuid: str = None):
-    if uuid is None:
-        uuid = ctx.user.id
+async def userrecords(interaction, member: discord.Member = None):
+    if member is None:
+        member = interaction.user
+
+    uuid = member.id
 
     user_record = userdata.find_one({"_id": uuid})
 
     if user_record is None or 'record' not in user_record:
-        await ctx.response.send_message(f"<@{uuid}> hasn't raced yet.")
+        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
+        # Fetch and format the user's data
         record_wpm = user_record['record']['wpm']
         accuracy = user_record['record']['accuracy']
-        await ctx.response.send_message(f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
+        await interaction.response.send_message(
+            f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%")
 
 
 @bot.tree.command(name="userprogress")
-async def userprogress(ctx, uuid: str = None):
-    if uuid is None:
-        uuid = ctx.user.id
+async def userrecords(interaction, member: discord.Member = None):
+    if member is None:
+        member = interaction.user
+
+    uuid = member.id
 
     user_record = userdata.find_one({"_id": uuid})
 
     if user_record is None or 'progress' not in user_record:
-        await ctx.response.send_message(f"<@{uuid}> hasn't raced yet.")
+        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
         progress_message = f"<@{uuid}>'s progress:\n"
         for record in user_record['progress']:
             progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}%\n"
-        await ctx.response.send_message(progress_message)
+        await interaction.response.send_message(progress_message)
 
 
 @bot.tree.command(name="leaderboard")
-async def leaderboard(ctx):
+async def leaderboard(interaction):
     user_records = userdata.find({})
 
     sorted_records = sorted(user_records, key=lambda x: x['record']['wpm'], reverse=True)
@@ -132,22 +139,22 @@ async def leaderboard(ctx):
 
     leaderboard_message = "Leaderboard:\n"
     for i, record in enumerate(top_10_records, start=1):
-        username = record['_id']
+        uuid = record['_id']
         stats = record['record']
-        leaderboard_message += f"{i}. {username} - WPM: {stats['wpm']}, Accuracy: {stats['accuracy']}%\n"
+        leaderboard_message += f"{i}. <@{uuid}> - WPM: {stats['wpm']}, Accuracy: {stats['accuracy']}%\n"
 
-    await ctx.response.send_message(leaderboard_message)
+    await interaction.response.send_message(leaderboard_message)
 
 
 @bot.tree.command(name="typerace_german")
-async def typerace_german(ctx, num_words: int = 15):
+async def typerace_german(interaction, num_words: int = 15):
     if num_words < 1:
-        await ctx.response.send_message("You must type at least 1 word.")
+        await interaction.response.send_message("You must type at least 1 word.")
         return
 
-    await ctx.response.send_message("TypeRace is starting in 3 seconds!")
+    await interaction.response.send_message("TypeRace is starting in 3 seconds!")
     await asyncio.sleep(1)
-    message = await ctx.followup.send("Get ready!")
+    message = await interaction.followup.send("Get ready!")
     await asyncio.sleep(1)
     for i in range(3, 0, -1):
         await message.edit(content=str(i))
@@ -157,19 +164,19 @@ async def typerace_german(ctx, num_words: int = 15):
     await message.edit(content="Type the following sentence as fast as you can!")
     words = random.sample(open("FilesNeeded/randomquotes.csv").readlines(), num_words)
     sentence = ' '.join(word.strip() for word in words)
-    sentence_message = await ctx.followup.send(sentence)
+    sentence_message = await interaction.followup.send(sentence)
 
     start_time = time.time()
 
     def check(m):
-        return m.author == ctx.user and m.channel == ctx.channel
+        return m.author == interaction.user and m.channel == interaction.channel
 
     timeout = 900 if num_words != 15 else 60
 
     try:
         msg = await bot.wait_for('message', check=check, timeout=timeout)
     except asyncio.TimeoutError:
-        await ctx.followup.send("Time is up!")
+        await interaction.followup.send("Time is up!")
     else:
         end_time = time.time()
         wpm = calculate_wpm(start_time, end_time, len(words))
@@ -177,13 +184,13 @@ async def typerace_german(ctx, num_words: int = 15):
         underlined_sentence = underline_errors(msg.content, sentence)
 
         if correctness < 30:
-            await ctx.followup.send("Your test is invalid due to low accuracy.")
+            await interaction.followup.send("Your test is invalid due to low accuracy.")
         else:
-            await ctx.followup.send(
+            await interaction.followup.send(
                 f"Your words per minute: {wpm}. Correctness: {correctness}%\nYour sentence:\n{underlined_sentence}")
 
             if num_words == 15:
-                uid = ctx.user.id
+                uid = interaction.user.id
                 user_record = userdata.find_one({"_id": uid})
                 update_user_progress(userdata, uid, wpm, correctness)
 
