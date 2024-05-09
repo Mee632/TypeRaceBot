@@ -1,9 +1,4 @@
 asyncio
-time
-json
-os
 discord
-random
-dotenv
 pymongo~=4.7.1
 python-dotenv~=1.0.1
