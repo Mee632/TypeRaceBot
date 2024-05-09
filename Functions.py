@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 
+
 def calculate_wpm(start_time, end_time, num_words):
     elapsed_time = end_time - start_time
     minutes = elapsed_time / 60
@@ -33,5 +34,6 @@ def update_user_progress(userdata, uid, wpm, accuracy, language):
         userdata.insert_one({"_id": uid, "progress": [], "record": {"wpm": 0, "accuracy": 0, "language": ""}})
 
     user_record = userdata.find_one({"_id": uid})
-    user_record["progress"].append({'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
+    user_record["progress"].append(
+        {'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
     userdata.update_one({"_id": uid}, {"$set": {"progress": user_record["progress"]}})

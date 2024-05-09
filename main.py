@@ -36,7 +36,7 @@ async def on_ready():
 
 @bot.tree.command(name="help")
 async def help(interaction):
-    await interaction.response.send_message("Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:\n")
+    await interaction.response.send_message("Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:\n typerace [language] [num_words] - Startet ein TypeRace Spiel\n userrecords [member] - Zeigt die Rekorde eines Mitglieds\n userprogress [member] - Zeigt den Fortschritt eines Mitglieds\n leaderboard - Zeigt die Top 10 Rekorde\n multiplayer [num_players] - Startet ein Multiplayer TypeRace Spiel\n")
 
 
 @bot.tree.command(name="multiplayer")
