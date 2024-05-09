@@ -15,8 +15,7 @@ from datetime import datetime
 
 
 #MongoDb
-myclient = pymongo.MongoClient(
-    "mongodb+srv://wimmerjakob9:zjt6LQCz7b9qyVEl@typeracebot.nauuy66.mongodb.net/?retryWrites=true&w=majority&appName=TypeRaceBot")
+myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
 mydb = myclient["TypeRaceBotTest"]
 userdata = mydb["User"]
 
