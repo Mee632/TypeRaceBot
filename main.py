@@ -11,11 +11,13 @@ from Functions import calculate_wpm
 from Functions import calculate_correctness
 from Functions import underline_errors
 from Functions import update_user_progress
+from datetime import datetime
+
 
 #MongoDb
 myclient = pymongo.MongoClient(
     "mongodb+srv://wimmerjakob9:zjt6LQCz7b9qyVEl@typeracebot.nauuy66.mongodb.net/?retryWrites=true&w=majority&appName=TypeRaceBot")
-mydb = myclient["TypeRaceBot"]
+mydb = myclient["TypeRaceBotTest"]
 userdata = mydb["User"]
 
 load_dotenv()
@@ -36,7 +38,13 @@ async def on_ready():
 
 @bot.tree.command(name="help")
 async def help(interaction):
-    await interaction.response.send_message("Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:\n typerace [language] [num_words] - Startet ein TypeRace Spiel\n userrecords [member] - Zeigt die Rekorde eines Mitglieds\n userprogress [member] - Zeigt den Fortschritt eines Mitglieds\n leaderboard - Zeigt die Top 10 Rekorde\n multiplayer [num_players] - Startet ein Multiplayer TypeRace Spiel\n")
+    embed = discord.Embed(title="🤖 TypeRaceBot Help", description="Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:", color=0xD22B2B)
+    embed.add_field(name="🏁 typerace [language] [num_words]", value="Startet ein TypeRace Spiel", inline=False)
+    embed.add_field(name="📊 userrecords [member]", value="Zeigt die Rekorde eines Mitglieds", inline=False)
+    embed.add_field(name="📈 userprogress [member]", value="Zeigt den Fortschritt eines Mitglieds", inline=False)
+    embed.add_field(name="🏆 leaderboard", value="Zeigt die Top 10 Rekorde", inline=False)
+    embed.add_field(name="👥 multiplayer [num_players]", value="Startet ein Multiplayer TypeRace Spiel", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="multiplayer")
@@ -108,12 +116,17 @@ async def userrecords(interaction, member: discord.Member = None):
         record_wpm = user_record['record']['wpm']
         accuracy = user_record['record']['accuracy']
         language_used = user_record['record']['language']
-        await interaction.response.send_message(
-            f"<@{uuid}>'s record:\nWords per minute: {record_wpm}\nAccuracy: {accuracy}%\nLanguage: {language_used}")
+
+        embed = discord.Embed(title=f"📊 {member.name}'s Records", description=f"Here are the records for <@{uuid}>:", color=0x00ff00)
+        embed.add_field(name="🚀 Words per minute", value=record_wpm, inline=False)
+        embed.add_field(name="🎯 Accuracy", value=f"{accuracy}%", inline=False)
+        embed.add_field(name="🌐 Language", value=language_used, inline=False)
+
+        await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="userprogress")
-async def userrecords(interaction, member: discord.Member = None):
+async def userprogress(interaction, member: discord.Member = None):
     if member is None:
         member = interaction.user
 
@@ -124,10 +137,11 @@ async def userrecords(interaction, member: discord.Member = None):
     if user_record is None or 'progress' not in user_record:
         await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
-        progress_message = f"<@{uuid}>'s progress:\n"
+        embed = discord.Embed(title=f"{member.name}'s Progress", description=f"Here is the progress for <@{uuid}>:", color=0xD22B2B)
         for record in user_record['progress']:
-            progress_message += f"Date: {record['date']}, Words per minute: {record['wpm']}, Accuracy: {record['accuracy']}% in {record['language']}\n"
-        await interaction.response.send_message(progress_message)
+            date = datetime.fromisoformat(record['date']).strftime('%Y-%m-%d %H:%M:%S')  # Clean up the date
+            embed.add_field(name=f"📅 Date: {date}", value=f"🚀 Words per minute: {record['wpm']}, 🎯 Accuracy: {record['accuracy']}% in {record['language']}", inline=False)
+        await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="leaderboard")
@@ -138,13 +152,15 @@ async def leaderboard(interaction):
 
     top_10_records = sorted_records[:10]
 
-    leaderboard_message = "Leaderboard:\n"
+    embed = discord.Embed(title="🏆 Leaderboard", description="Here are the top 10 players:", color=0xD22B2B)
     for i, record in enumerate(top_10_records, start=1):
         uuid = record['_id']
+        user = await bot.fetch_user(uuid)  # Fetch the user object from the user ID
+        username = user.name  # Get the username from the user object
         stats = record['record']
-        leaderboard_message += f"{i}. <@{uuid}> - WPM: {stats['wpm']}, Accuracy: {stats['accuracy']}% in {stats['language']}\n"
+        embed.add_field(name=f"{i}. {username}", value=f"🚀 WPM: {stats['wpm']}, 🎯 Accuracy: {stats['accuracy']}% in {stats['language']}", inline=False)
 
-    await interaction.response.send_message(leaderboard_message)
+    await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="typerace")
