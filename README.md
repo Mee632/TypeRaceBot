@@ -29,3 +29,6 @@ Invite the bot to your Discord server. Use the `/help` command to view all avail
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Official Discord Server:
+https://discord.gg/AF7HpbDfk3
