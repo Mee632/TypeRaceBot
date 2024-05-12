@@ -4,8 +4,8 @@ import os
 import discord
 import random
 import pymongo
-from discord.ext import commands
 from dotenv import load_dotenv
+from discord.ext import commands
 from typing import Final
 from Functions import calculate_wpm
 from Functions import calculate_correctness
@@ -13,10 +13,11 @@ from Functions import underline_errors
 from Functions import update_user_progress
 from datetime import datetime
 
-
 #MongoDb
-myclient = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
-mydb = myclient["TypeRaceBotTest"]
+load_dotenv()
+MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
+myclient = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
+mydb = myclient["TypeRaceBot"]
 userdata = mydb["User"]
 
 load_dotenv()
