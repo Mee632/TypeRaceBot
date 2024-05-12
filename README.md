@@ -24,7 +24,7 @@ TypeRaceBot is a Discord bot written in Python that allows users to play a typin
 
 ## Usage
 
-Invite the bot to your Discord server. Use the `!help` command to view all available commands and how to use them.
+Invite the bot to your Discord server. Use the `/help` command to view all available commands and how to use them.
 
 ## Contributing
 
