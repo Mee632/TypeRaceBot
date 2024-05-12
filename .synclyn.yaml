@@ -4,5 +4,6 @@ version: 3.12.3
 hooks:
   deploy: 
     - pip install -r requirements.txt
+    - echo "hallo"
   start: 
     - python main.py
