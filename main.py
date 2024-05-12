@@ -66,7 +66,9 @@ async def multiplayer(interaction, num_players: int):
     await message.edit(content="Type the following sentence as fast as you can!")
     words = random.sample(open("FilesNeeded/randomquotes_de.csv").readlines(), 15)
     sentence = ' '.join(word.strip() for word in words)
-    sentence_message = await interaction.followup.send(sentence)
+    img_io = text_to_image(sentence)
+
+    await interaction.followup.send(file=discord.File(img_io, filename='image.jpeg'))
 
     start_time = time.time()
 
