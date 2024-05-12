@@ -1,5 +1,7 @@
 from datetime import datetime
-import json
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import textwrap
 
 
 def calculate_wpm(start_time, end_time, num_words):
@@ -37,3 +39,34 @@ def update_user_progress(userdata, uid, wpm, accuracy, language):
     user_record["progress"].append(
         {'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
     userdata.update_one({"_id": uid}, {"$set": {"progress": user_record["progress"]}})
+
+
+def get_text_dimensions(text_string, font):
+    ascent, descent = font.getmetrics()
+    text_width = font.getmask(text_string).getbbox()[2]
+    text_height = font.getmask(text_string).getbbox()[3] + descent
+    return (text_width, text_height)
+
+
+def text_to_image(text):
+    fnt = ImageFont.truetype('FilesNeeded/GG Sans.ttf', 30)
+
+    wrapped_text = textwrap.wrap(text, width=80)
+
+    text_sizes = [get_text_dimensions(line, fnt) for line in wrapped_text]
+
+    max_width = max(width for width, height in text_sizes)
+    total_height = sum(height for width, height in text_sizes)
+    img = Image.new('RGB', (max_width + 25, total_height + 25), color=(54, 57, 63))
+
+    d = ImageDraw.Draw(img)
+
+    current_height = 10
+    for i, line in enumerate(wrapped_text):
+        d.text((10, current_height), line, font=fnt, fill=(255, 255, 255))
+        current_height += text_sizes[i][1]
+
+    img_io = BytesIO()
+    img.save(img_io, 'JPEG', quality=70)
+    img_io.seek(0)
+    return img_io

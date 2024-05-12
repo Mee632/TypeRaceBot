@@ -12,12 +12,13 @@ from Functions import calculate_correctness
 from Functions import underline_errors
 from Functions import update_user_progress
 from datetime import datetime
+from Functions import text_to_image
 
 #MongoDb
 load_dotenv()
 MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 myclient = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
-mydb = myclient["TypeRaceBot"]
+mydb = myclient["TypeRaceBotTest"]
 userdata = mydb["User"]
 
 load_dotenv()
@@ -185,7 +186,9 @@ async def typerace(interaction, language: str = None, num_words: int = 15):
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
     sentence = ' '.join(word.strip() for word in words)
-    sentence_message = await interaction.followup.send(sentence)
+    img_io = text_to_image(sentence)
+
+    await interaction.followup.send(file=discord.File(img_io, filename='image.jpeg'))
 
     start_time = time.time()
 
