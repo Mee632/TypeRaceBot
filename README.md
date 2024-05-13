@@ -1,34 +1,59 @@
-# TypeRaceBot
+# 🚀 TypeRaceBot
 
-TypeRaceBot is a Discord bot written in Python that allows users to play a typing speed game. The bot provides several commands for users to interact with, including starting a game, viewing user records and progress, and viewing a leaderboard of top scores.
+TypeRaceBot is a Discord bot that allows users to participate in typing races. It's built with Python and uses the discord.py library.
 
-## Features
+## 📚 Features
 
-- **TypeRace Game**: Users can start a typing speed game with the `/typerace` command. The bot will provide a sentence for the user to type as fast as they can. The bot calculates the user's words per minute (WPM) and correctness of the typed sentence.
+- 🏁 **TypeRace**: Start a typing race with a specified language and number of words.
+- 👥 **Multiplayer**: Start a multiplayer typing race with a specified number of players and language.
+- 📊 **User Records**: Show the typing records of a specified member.
+- 📈 **User Progress**: Show the typing progress of a specified member.
+- 🏆 **Leaderboard**: Show the top 10 typing records.
+- 🎓 **Experience**: Show the experience and level of a specified member.
 
-- **Multiplayer Game**: Users can start a multiplayer typing speed game with the `/multiplayer` command. The bot will provide a sentence for all players to type as fast as they can. The bot calculates each player's WPM and correctness, and announces the winner.
+## 🛠️ Installation
 
-- **User Records**: Users can view their own or other users' records with the `/userrecords` command. The bot will display the user's best WPM, accuracy, and the language used in their best game.
+1. Clone the repository:
+git clone https://github.com/yourusername/typeracebot.git
 
-- **User Progress**: Users can view their own or other users' progress with the `/userprogress` command. The bot will display the user's WPM and accuracy for each game they've played.
+2. Install the required Python packages:
+pip install -r requirements.txt
 
-- **Leaderboard**: Users can view the top 10 records with the `/leaderboard` command. The bot will display the top 10 users' WPM, accuracy, and the language used in their best game.
+3. Create a `.env` file in the root directory and add your Discord bot token:
+TOKEN=your_discord_bot_token
 
-## Installation
+4. Run the bot:
+python main.py
 
-1. Clone this repository.
-2. Install the required Python packages by running `pip install -r requirements.txt`.
-3. Set up your MongoDB database and update the connection string in `main.py`.
-4. Create a `.env` file in the root directory and add your Discord bot token with the key `DISCORD_TOKEN`.
-5. Run `main.py` to start the bot.
+## 📝 Usage
 
-## Usage
+- Start a typing race:
+!typerace [language] [num_words]
 
-Invite the bot to your Discord server. Use the `/help` command to view all available commands and how to use them.
+- Start a multiplayer typing race:
+!multiplayer [num_players] [language]
 
-## Contributing
+- Show the typing records of a member:
+!userrecords [member]
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+- Show the typing progress of a member:
+!userprogress [member]
 
-Official Discord Server:
-https://discord.gg/AF7HpbDfk3
+- Show the top 10 typing records:
+!leaderboard
+
+- Show the experience and level of a member:
+!experience [member]
+
+## 📜 License
+
+This project is licensed under the AP License.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+## 🙏 Acknowledgments
+
+- Thanks to the discord.py library for making this project possible.
+- Thanks to all contributors who have helped with this project.
