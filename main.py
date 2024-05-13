@@ -13,7 +13,6 @@ from Functions import underline_errors
 from Functions import update_user_progress
 from datetime import datetime
 from Functions import text_to_image
-from Functions import calculate_xp_gain, calculate_level
 
 #MongoDb
 load_dotenv()
