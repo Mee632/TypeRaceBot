@@ -18,7 +18,7 @@ from Functions import text_to_image
 load_dotenv()
 MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 myclient = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
-mydb = myclient["TypeRaceBot"]
+mydb = myclient["TypeRaceBotTest"]
 userdata = mydb["User"]
 
 load_dotenv()
@@ -39,22 +39,22 @@ async def on_ready():
 
 @bot.tree.command(name="help")
 async def help(interaction):
-    embed = discord.Embed(title="🤖 TypeRaceBot Help", description="Hallo! Ich bin der TypeRaceBot. Hier sind meine Befehle:", color=0xD22B2B)
-    embed.add_field(name="🏁 typerace [language] [num_words]", value="Startet ein TypeRace Spiel", inline=False)
-    embed.add_field(name="📊 userrecords [member]", value="Zeigt die Rekorde eines Mitglieds", inline=False)
-    embed.add_field(name="📈 userprogress [member]", value="Zeigt den Fortschritt eines Mitglieds", inline=False)
-    embed.add_field(name="🏆 leaderboard", value="Zeigt die Top 10 Rekorde", inline=False)
-    embed.add_field(name="👥 multiplayer [num_players]", value="Startet ein Multiplayer TypeRace Spiel", inline=False)
+    embed = discord.Embed(title="🤖 TypeRaceBot Help", description="Hello! I'm the TypeRaceBot. Here are my commands:", color=0xD22B2B)
+    embed.add_field(name="🏁 typerace [language] [num_words]", value="Starts a TypeRace game. Available languages: English, German, Spanish", inline=False)
+    embed.add_field(name="👥 multiplayer [num_players] [language]", value="Starts a Multiplayer TypeRace game. Available languages: English, German, Spanish", inline=False)
+    embed.add_field(name="📊 userrecords [member]", value="Shows the records of a member", inline=False)
+    embed.add_field(name="📈 userprogress [member]", value="Shows the progress of a member", inline=False)
+    embed.add_field(name="🏆 leaderboard", value="Shows the top 10 records", inline=False)
     await interaction.response.send_message(embed=embed)
 
 
 @bot.tree.command(name="multiplayer")
-async def multiplayer(interaction, num_players: int):
+async def multiplayer(interaction, num_players: int, language: str = "English"):
     if num_players < 2:
         await interaction.response.send_message("You need at least 2 players for a multiplayer game.")
         return
 
-    await interaction.response.send_message(f"Multiplayer TypeRace is starting in 3 seconds for {num_players} players!")
+    await interaction.response.send_message(f"Multiplayer TypeRace in {language} is starting in 3 seconds for {num_players} players!")
     await asyncio.sleep(1)
     message = await interaction.followup.send("Get ready!")
     await asyncio.sleep(1)
@@ -64,7 +64,7 @@ async def multiplayer(interaction, num_players: int):
     await message.edit(content="Go!")
     await asyncio.sleep(1)
     await message.edit(content="Type the following sentence as fast as you can!")
-    words = random.sample(open("FilesNeeded/randomquotes_de.csv").readlines(), 15)
+    words = random.sample(open(f"FilesNeeded/randomquotes_{language}.csv").readlines(), 15)
     sentence = ' '.join(word.strip() for word in words)
     img_io = text_to_image(sentence)
 
@@ -169,7 +169,7 @@ async def leaderboard(interaction):
 @bot.tree.command(name="typerace")
 async def typerace(interaction, language: str = None, num_words: int = 15):
     if language is None:
-        language = "en"
+        language = "English"
 
     if num_words < 1:
         await interaction.response.send_message("You must type at least 1 word.")
