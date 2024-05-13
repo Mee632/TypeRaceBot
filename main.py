@@ -13,12 +13,13 @@ from Functions import underline_errors
 from Functions import update_user_progress
 from datetime import datetime
 from Functions import text_to_image
+from Functions import calculate_xp_gain, calculate_level
 
 #MongoDb
 load_dotenv()
 MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 myclient = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
-mydb = myclient["TypeRaceBot"]
+mydb = myclient["TypeRaceBotTest"]
 userdata = mydb["User"]
 
 load_dotenv()
@@ -45,6 +46,7 @@ async def help(interaction):
     embed.add_field(name="📊 userrecords [member]", value="Shows the records of a member", inline=False)
     embed.add_field(name="📈 userprogress [member]", value="Shows the progress of a member", inline=False)
     embed.add_field(name="🏆 leaderboard", value="Shows the top 10 records", inline=False)
+    embed.add_field(name="🎓 experience [member]", value="Shows the experience and level of a member", inline=False)
     await interaction.response.send_message(embed=embed)
 
 
@@ -218,10 +220,46 @@ async def typerace(interaction, language: str = None, num_words: int = 15):
             if num_words == 15:
                 uid = interaction.user.id
                 user_record = userdata.find_one({"_id": uid})
-                update_user_progress(userdata, uid, wpm, correctness, language)
 
-                if user_record is None or wpm > user_record['record']['wpm']:
-                    userdata.update_one({"_id": uid}, {"$set": {"record": {"wpm": wpm, "accuracy": correctness, "language": language}}})
+                # Check if 'xp' and 'level' fields exist in the user's record
+                if user_record is not None:
+                    if 'xp' not in user_record:
+                        user_record['xp'] = 0
+                    if 'level' not in user_record:
+                        user_record['level'] = 1
 
+                    update_user_progress(userdata, uid, wpm, correctness, language)
+
+                    if user_record is None or wpm > user_record['record']['wpm']:
+                        userdata.update_one({"_id": uid}, {
+                            "$set": {"record": {"wpm": wpm, "accuracy": correctness, "language": language}}})
+
+@bot.tree.command(name="experience")
+async def experience(interaction, member: discord.Member = None):
+    if member is None:
+        member = interaction.user
+
+    uuid = member.id
+
+    user_record = userdata.find_one({"_id": uuid})
+
+    if user_record is None:
+        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
+    else:
+        # Check if 'xp' and 'level' fields exist in the user's record
+        if 'xp' not in user_record:
+            user_record['xp'] = 0
+        if 'level' not in user_record:
+            user_record['level'] = 1
+
+        xp = user_record['xp']
+        level = user_record['level']
+
+        embed = discord.Embed(title=f"{member.name}'s Experience", description=f"Here is the experience for <@{uuid}>:",
+                              color=0x00ff00)
+        embed.add_field(name="🎓 Level", value=level, inline=False)
+        embed.add_field(name="🌟 XP", value=xp, inline=False)
+
+        await interaction.response.send_message(embed=embed)
 
 bot.run(TOKEN)

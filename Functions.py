@@ -33,12 +33,22 @@ def underline_errors(user_input, correct_sentence):
 def update_user_progress(userdata, uid, wpm, accuracy, language):
     user_record = userdata.find_one({"_id": uid})
     if user_record is None:
-        userdata.insert_one({"_id": uid, "progress": [], "record": {"wpm": 0, "accuracy": 0, "language": ""}})
+        userdata.insert_one(
+            {"_id": uid, "progress": [], "record": {"wpm": 0, "accuracy": 0, "language": ""}, "xp": 0, "level": 1})
 
     user_record = userdata.find_one({"_id": uid})
+    if 'xp' not in user_record:
+        user_record['xp'] = 0
+    if 'level' not in user_record:
+        user_record['level'] = 1
+
+    xp_gain = calculate_xp_gain(wpm, accuracy)  # Calculate XP gain
+    user_record["xp"] += xp_gain  # Update XP
+    user_record["level"] = calculate_level(user_record["xp"])  # Update level
     user_record["progress"].append(
         {'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
-    userdata.update_one({"_id": uid}, {"$set": {"progress": user_record["progress"]}})
+    userdata.update_one({"_id": uid}, {
+        "$set": {"progress": user_record["progress"], "xp": user_record["xp"], "level": user_record["level"]}})
 
 
 def get_text_dimensions(text_string, font):
@@ -70,3 +80,15 @@ def text_to_image(text):
     img.save(img_io, 'JPEG', quality=70)
     img_io.seek(0)
     return img_io
+
+
+# Function to calculate XP gain
+def calculate_xp_gain(wpm, accuracy):
+    # This is a simple formula, you can adjust it as needed
+    return round((wpm * accuracy) / 100)
+
+
+# Function to calculate level based on XP
+def calculate_level(xp):
+    # This is a simple formula, you can adjust it as needed
+    return xp // 100 + 1
