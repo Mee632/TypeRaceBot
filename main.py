@@ -19,7 +19,7 @@ from Functions import calculate_xp_gain, calculate_level
 load_dotenv()
 MONGODB_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 myclient = pymongo.MongoClient(MONGODB_CONNECTION_STRING)
-mydb = myclient["TypeRaceBotTest"]
+mydb = myclient["TypeRaceBot"]
 userdata = mydb["User"]
 
 load_dotenv()
