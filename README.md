@@ -47,7 +47,7 @@ python main.py
 
 ## 📜 License
 
-This project is licensed under the AP License.
+This project is licensed under the Apache License.
 
 ## 🤝 Contributing
 
