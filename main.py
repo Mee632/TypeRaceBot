@@ -4,6 +4,8 @@ import os
 import discord
 import random
 import pymongo
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from dotenv import load_dotenv
 from discord.ext import commands
 from typing import Final
@@ -46,7 +48,49 @@ async def help(interaction):
     embed.add_field(name="📈 userprogress [member]", value="Shows the progress of a member", inline=False)
     embed.add_field(name="🏆 leaderboard", value="Shows the top 10 records", inline=False)
     embed.add_field(name="🎓 experience [member]", value="Shows the experience and level of a member", inline=False)
+    embed.add_field(name="📅 typinghistory [member]", value="Shows the typing history of a member", inline=False)
     await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="userprogress")
+async def userprogress(interaction, member: discord.Member = None):
+    if member is None:
+        member = interaction.user
+
+    uuid = member.id
+
+    user_record = userdata.find_one({"_id": uuid})
+
+    if user_record is None or 'progress' not in user_record:
+        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
+    else:
+        dates = [datetime.fromisoformat(record['date']) for record in user_record['progress']]
+        wpms = [record['wpm'] for record in user_record['progress']]
+        accuracies = [record['accuracy'] for record in user_record['progress']]
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 6))
+
+        plt.style.use('dark_background')
+        fig.patch.set_facecolor('#36393F')
+
+        color = 'white'
+        ax1.set_facecolor('#36393F')
+        ax1.set_xlabel('Date', fontsize=14, fontweight='bold', color=color)
+        ax1.set_ylabel('Words per minute', color=color, fontsize=14, fontweight='bold')
+        ax1.plot(dates, wpms, marker='o', color=color, linewidth=3)
+        ax1.tick_params(axis='y', labelcolor=color, labelsize=12)
+
+        ax2.set_facecolor('#36393F')
+        ax2.set_xlabel('Date', fontsize=14, fontweight='bold', color=color)
+        ax2.set_ylabel('Accuracy (%)', color=color, fontsize=14, fontweight='bold')
+        ax2.plot(dates, accuracies, marker='o', color=color, linewidth=3)
+        ax2.tick_params(axis='y', labelcolor=color, labelsize=12)
+
+        fig.tight_layout()
+        plt.grid(False)
+        plt.savefig('progress.png', facecolor=fig.get_facecolor(), edgecolor='none')
+
+        await interaction.response.send_message(file=discord.File('progress.png'))
 
 
 @bot.tree.command(name="multiplayer")
@@ -129,8 +173,8 @@ async def userrecords(interaction, member: discord.Member = None):
         await interaction.response.send_message(embed=embed)
 
 
-@bot.tree.command(name="userprogress")
-async def userprogress(interaction, member: discord.Member = None):
+@bot.tree.command(name="typinghistory")
+async def typinghistory(interaction, member: discord.Member = None):
     if member is None:
         member = interaction.user
 
@@ -232,6 +276,7 @@ async def typerace(interaction, language: str = None, num_words: int = 15):
                     if user_record is None or wpm > user_record['record']['wpm']:
                         userdata.update_one({"_id": uid}, {
                             "$set": {"record": {"wpm": wpm, "accuracy": correctness, "language": language}}})
+
 
 @bot.tree.command(name="experience")
 async def experience(interaction, member: discord.Member = None):
