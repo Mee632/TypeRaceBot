@@ -218,7 +218,7 @@ async def profile(interaction, member: discord.Member = None):
     if uuid in top_3_ids:
         placement = top_3_ids.index(uuid) + 1  # Get the placement (1, 2, or 3)
         achievements = user_record.get('achievements', [])
-        achievements.append(f"{placement} in leaderboard")
+        achievements.append(f"{placement}. on leaderboard")
     else:
         achievements = user_record.get('achievements', [])
 
