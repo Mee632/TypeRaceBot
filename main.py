@@ -173,6 +173,34 @@ async def userrecords(interaction, member: discord.Member = None):
         await interaction.response.send_message(embed=embed)
 
 
+class PaginationView(discord.ui.View):
+    def __init__(self, member, user_record):
+        super().__init__()
+        self.member = member
+        self.user_record = user_record
+        self.current_page = 0
+
+    async def get_embed(self):
+        embed = discord.Embed(title=f"{self.member.name}'s Progress", description=f"Here is the progress for <@{self.member.id}>:", color=0xD22B2B)
+        for record in self.user_record['progress'][self.current_page*10:(self.current_page+1)*10]:
+            date = datetime.fromisoformat(record['date']).strftime('%Y-%m-%d %H:%M:%S')  # Clean up the date
+            embed.add_field(name=f"📅 Date: {date}", value=f"🚀 Words per minute: {record['wpm']}, 🎯 Accuracy: {record['accuracy']}% in {record['language']}", inline=False)
+        return embed
+
+    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
+    async def previous_page(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.current_page > 0:
+            self.current_page -= 1
+        embed = await self.get_embed()
+        await interaction.response.edit_message(embed=embed)
+
+    @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
+    async def next_page(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.current_page += 1
+        embed = await self.get_embed()
+        await interaction.response.edit_message(embed=embed)
+
+
 @bot.tree.command(name="typinghistory")
 async def typinghistory(interaction, member: discord.Member = None):
     if member is None:
@@ -185,11 +213,9 @@ async def typinghistory(interaction, member: discord.Member = None):
     if user_record is None or 'progress' not in user_record:
         await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
-        embed = discord.Embed(title=f"{member.name}'s Progress", description=f"Here is the progress for <@{uuid}>:", color=0xD22B2B)
-        for record in user_record['progress']:
-            date = datetime.fromisoformat(record['date']).strftime('%Y-%m-%d %H:%M:%S')  # Clean up the date
-            embed.add_field(name=f"📅 Date: {date}", value=f"🚀 Words per minute: {record['wpm']}, 🎯 Accuracy: {record['accuracy']}% in {record['language']}", inline=False)
-        await interaction.response.send_message(embed=embed)
+        view = PaginationView(member, user_record)
+        embed = await view.get_embed()
+        await interaction.response.send_message(embed=embed, view=view)
 
 
 @bot.tree.command(name="leaderboard")
