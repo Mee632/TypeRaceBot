@@ -201,6 +201,45 @@ class PaginationView(discord.ui.View):
         await interaction.response.edit_message(embed=embed)
 
 
+@bot.tree.command(name="profile")
+async def profile(interaction, member: discord.Member = None):
+    if member is None:
+        member = interaction.user
+
+    uuid = member.id
+
+    user_record = userdata.find_one({"_id": uuid})
+
+    # Fetch the top 3 users
+    top_3_users = userdata.find().sort("record.wpm", pymongo.DESCENDING).limit(3)
+    top_3_ids = [user["_id"] for user in top_3_users]
+
+    # Check if the user is in the top 3
+    if uuid in top_3_ids:
+        placement = top_3_ids.index(uuid) + 1  # Get the placement (1, 2, or 3)
+        achievements = user_record.get('achievements', [])
+        achievements.append(f"{placement} in leaderboard")
+    else:
+        achievements = user_record.get('achievements', [])
+
+    if user_record is None:
+        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
+    else:
+        # Fetch and format the user's data
+        level = user_record.get('level', 'N/A')
+        xp = user_record.get('xp', 'N/A')
+        record_wpm = user_record['record']['wpm']
+
+        embed = discord.Embed(title=f"{member.name}'s Profile", description=f"Here is the profile for <@{uuid}>:", color=0xD22B2B)
+        embed.set_thumbnail(url=member.avatar.url)  # Set the thumbnail to the user's avatar
+        embed.add_field(name="🎓 Level", value=level, inline=False)
+        embed.add_field(name="🌟 XP", value=xp, inline=False)
+        embed.add_field(name="🏅 Achievements", value=', '.join(achievements) or 'None', inline=False)
+        embed.add_field(name=f"🎮 {member.name}'s record WPM", value=record_wpm, inline=False)
+
+        await interaction.response.send_message(embed=embed)
+
+
 @bot.tree.command(name="typinghistory")
 async def typinghistory(interaction, member: discord.Member = None):
     if member is None:
@@ -303,33 +342,5 @@ async def typerace(interaction, language: str = None, num_words: int = 15):
                         userdata.update_one({"_id": uid}, {
                             "$set": {"record": {"wpm": wpm, "accuracy": correctness, "language": language}}})
 
-
-@bot.tree.command(name="experience")
-async def experience(interaction, member: discord.Member = None):
-    if member is None:
-        member = interaction.user
-
-    uuid = member.id
-
-    user_record = userdata.find_one({"_id": uuid})
-
-    if user_record is None:
-        await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
-    else:
-        # Check if 'xp' and 'level' fields exist in the user's record
-        if 'xp' not in user_record:
-            user_record['xp'] = 0
-        if 'level' not in user_record:
-            user_record['level'] = 1
-
-        xp = user_record['xp']
-        level = user_record['level']
-
-        embed = discord.Embed(title=f"{member.name}'s Experience", description=f"Here is the experience for <@{uuid}>:",
-                              color=0x00ff00)
-        embed.add_field(name="🎓 Level", value=level, inline=False)
-        embed.add_field(name="🌟 XP", value=xp, inline=False)
-
-        await interaction.response.send_message(embed=embed)
 
 bot.run(TOKEN)

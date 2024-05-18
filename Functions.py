@@ -1,5 +1,5 @@
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageChops
 from io import BytesIO
 import textwrap
 
