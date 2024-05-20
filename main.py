@@ -5,7 +5,6 @@ import discord
 import random
 import pymongo
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from dotenv import load_dotenv
 from discord.ext import commands
 from typing import Final
@@ -42,13 +41,14 @@ async def on_ready():
 @bot.tree.command(name="help")
 async def help(interaction):
     embed = discord.Embed(title="🤖 TypeRaceBot Help", description="Hello! I'm the TypeRaceBot. Here are my commands:", color=0xD22B2B)
-    embed.add_field(name="🏁 typerace [language] [num_words]", value="Starts a TypeRace game. Available languages: English, German, Spanish", inline=False)
-    embed.add_field(name="👥 multiplayer [num_players] [language]", value="Starts a Multiplayer TypeRace game. Available languages: English, German, Spanish", inline=False)
-    embed.add_field(name="📊 userrecords [member]", value="Shows the records of a member", inline=False)
-    embed.add_field(name="📈 userprogress [member]", value="Shows the progress of a member", inline=False)
-    embed.add_field(name="🏆 leaderboard", value="Shows the top 10 records", inline=False)
-    embed.add_field(name="🎓 experience [member]", value="Shows the experience and level of a member", inline=False)
-    embed.add_field(name="📅 typinghistory [member]", value="Shows the typing history of a member", inline=False)
+    embed.add_field(name="🏁 !typerace [language] [num_words]", value="Starts a TypeRace game. Available languages: English, German, Spanish", inline=False)
+    embed.add_field(name="👥 !multiplayer [num_players] [language]", value="Starts a Multiplayer TypeRace game. Available languages: English, German, Spanish", inline=False)
+    embed.add_field(name="📊 !userrecords [member]", value="Shows the records of a member", inline=False)
+    embed.add_field(name="📈 !userprogress [member]", value="Shows the progress of a member", inline=False)
+    embed.add_field(name="🏆 !leaderboard", value="Shows the top 10 records", inline=False)
+    embed.add_field(name="🎓 !experience [member]", value="Shows the experience and level of a member", inline=False)
+    embed.add_field(name="📅 !typinghistory [member]", value="Shows the typing history of a member", inline=False)
+    embed.add_field(name="👤 !profile [member]", value="Shows the profile of a member", inline=False)
     await interaction.response.send_message(embed=embed)
 
 
@@ -139,10 +139,8 @@ async def multiplayer(interaction, num_players: int, language: str = "English"):
                     f"{msg.author.name}, your words per minute: {wpm}. Correctness: {correctness}%\nYour sentence:\n{underlined_sentence}")
                 results.append((msg.author.name, wpm, correctness))
 
-    # Sort the results by wpm and correctness
     results.sort(key=lambda x: (x[1], x[2]), reverse=True)
 
-    # Send the winner
     winner = results[0]
     await interaction.followup.send(
         f"The winner is {winner[0]} with {winner[1]} words per minute and {winner[2]}% correctness!")
@@ -160,7 +158,6 @@ async def userrecords(interaction, member: discord.Member = None):
     if user_record is None or 'record' not in user_record:
         await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
-        # Fetch and format the user's data
         record_wpm = user_record['record']['wpm']
         accuracy = user_record['record']['accuracy']
         language_used = user_record['record']['language']
@@ -210,13 +207,11 @@ async def profile(interaction, member: discord.Member = None):
 
     user_record = userdata.find_one({"_id": uuid})
 
-    # Fetch the top 3 users
     top_3_users = userdata.find().sort("record.wpm", pymongo.DESCENDING).limit(3)
     top_3_ids = [user["_id"] for user in top_3_users]
 
-    # Check if the user is in the top 3
     if uuid in top_3_ids:
-        placement = top_3_ids.index(uuid) + 1  # Get the placement (1, 2, or 3)
+        placement = top_3_ids.index(uuid) + 1
         achievements = user_record.get('achievements', [])
         achievements.append(f"{placement}. on leaderboard")
     else:
@@ -225,13 +220,12 @@ async def profile(interaction, member: discord.Member = None):
     if user_record is None:
         await interaction.response.send_message(f"<@{uuid}> hasn't raced yet.")
     else:
-        # Fetch and format the user's data
         level = user_record.get('level', 'N/A')
         xp = user_record.get('xp', 'N/A')
         record_wpm = user_record['record']['wpm']
 
         embed = discord.Embed(title=f"{member.name}'s Profile", description=f"Here is the profile for <@{uuid}>:", color=0xD22B2B)
-        embed.set_thumbnail(url=member.avatar.url)  # Set the thumbnail to the user's avatar
+        embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name="🎓 Level", value=level, inline=False)
         embed.add_field(name="🌟 XP", value=xp, inline=False)
         embed.add_field(name="🏅 Achievements", value=', '.join(achievements) or 'None', inline=False)
@@ -268,8 +262,8 @@ async def leaderboard(interaction):
     embed = discord.Embed(title="🏆 Leaderboard", description="Here are the top 10 players:", color=0xD22B2B)
     for i, record in enumerate(top_10_records, start=1):
         uuid = record['_id']
-        user = await bot.fetch_user(uuid)  # Fetch the user object from the user ID
-        username = user.name  # Get the username from the user object
+        user = await bot.fetch_user(uuid)
+        username = user.name
         stats = record['record']
         embed.add_field(name=f"{i}. {username}", value=f"🚀 WPM: {stats['wpm']}, 🎯 Accuracy: {stats['accuracy']}% in {stats['language']}", inline=False)
 
@@ -328,8 +322,6 @@ async def typerace(interaction, language: str = None, num_words: int = 15):
             if num_words == 15:
                 uid = interaction.user.id
                 user_record = userdata.find_one({"_id": uid})
-
-                # Check if 'xp' and 'level' fields exist in the user's record
                 if user_record is not None:
                     if 'xp' not in user_record:
                         user_record['xp'] = 0

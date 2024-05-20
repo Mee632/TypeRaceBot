@@ -1,5 +1,5 @@
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont, ImageChops
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import textwrap
 
@@ -42,9 +42,9 @@ def update_user_progress(userdata, uid, wpm, accuracy, language):
     if 'level' not in user_record:
         user_record['level'] = 1
 
-    xp_gain = calculate_xp_gain(wpm, accuracy)  # Calculate XP gain
-    user_record["xp"] += xp_gain  # Update XP
-    user_record["level"] = calculate_level(user_record["xp"])  # Update level
+    xp_gain = calculate_xp_gain(wpm, accuracy)
+    user_record["xp"] += xp_gain
+    user_record["level"] = calculate_level(user_record["xp"])
     user_record["progress"].append(
         {'userId': uid, 'wpm': wpm, 'accuracy': accuracy, 'date': datetime.now().isoformat(), 'language': language})
     userdata.update_one({"_id": uid}, {
@@ -55,7 +55,7 @@ def get_text_dimensions(text_string, font):
     ascent, descent = font.getmetrics()
     text_width = font.getmask(text_string).getbbox()[2]
     text_height = font.getmask(text_string).getbbox()[3] + descent
-    return (text_width, text_height)
+    return text_width, text_height
 
 
 def text_to_image(text):
@@ -82,13 +82,9 @@ def text_to_image(text):
     return img_io
 
 
-# Function to calculate XP gain
 def calculate_xp_gain(wpm, accuracy):
-    # This is a simple formula, you can adjust it as needed
     return round((wpm * accuracy) / 100)
 
 
-# Function to calculate level based on XP
 def calculate_level(xp):
-    # This is a simple formula, you can adjust it as needed
     return xp // 100 + 1
