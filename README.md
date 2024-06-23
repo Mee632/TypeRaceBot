@@ -28,7 +28,7 @@ python main.py
 ## 📝 Usage
 
 - Start a typing race:
-!typerace [language] [num_words]
+!typerace [language] [num_words] 
 
 - Start a multiplayer typing race:
 !multiplayer [num_players] [language]
