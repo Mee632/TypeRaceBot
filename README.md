@@ -28,7 +28,7 @@ python main.py
 ## 📝 Usage
 
 - Start a typing race:
-!typerace [language] [num_words]
+!typerace [language] [num_words] 
 
 - Start a multiplayer typing race:
 !multiplayer [num_players] [language]
@@ -57,4 +57,4 @@ Contributions, issues, and feature requests are welcome!
 
 - Thanks to the discord.py library for making this project possible.
 - Thanks to all contributors who have helped with this project.
-- Special Thanks to Synclyn for hosting 
+- Special Thanks to https://xo-6.studio/ for hosting.
