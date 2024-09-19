@@ -5,7 +5,7 @@ IMAGE_NAME="typeracebot"
 IMAGE_TAG="latest"
 REGISTRY_URL="registry.local.xo-6.studio"
 REGISTRY_USER="synclyn"
-REGISTRY_PASSWORD="6D0TJFW333PShuKaev5y"
+REGISTRY_PASSWORD=""
 
 docker build -t $REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG .
 
